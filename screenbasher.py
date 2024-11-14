@@ -2,7 +2,7 @@ import pygame
 import random
 import sys
 import threading
-import keyboard  # New import
+import keyboard
 
 def random_color():
     return random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
@@ -12,9 +12,6 @@ def block_system_keys():
     keys_to_block = [
         'windows',   # Windows key
         'esc',       # Escape key
-        'alt+tab',   # Alt+Tab combination
-        'alt+f4',    # Alt+F4 combination
-        'ctrl+esc',  # Ctrl+Escape combination
     ]
 
     for key_combo in keys_to_block:
@@ -53,17 +50,21 @@ while running:
                 running = False
                 break
 
-            x = random.randint(0, screen_width)
-            y = random.randint(0, screen_height)
             color = random_color()
 
             # Randomly choose to draw a circle or rectangle
             if random.choice([True, False]):
+                # Circle
                 radius = random.randint(10, 50)
+                x = random.randint(radius, screen_width - radius)
+                y = random.randint(radius, screen_height - radius)
                 items.append(('circle', color, (x, y), radius))
             else:
+                # Rectangle
                 width = random.randint(20, 100)
                 height = random.randint(20, 100)
+                x = random.randint(0, screen_width - width)
+                y = random.randint(0, screen_height - height)
                 rect = pygame.Rect(x, y, width, height)
                 items.append(('rect', color, rect))
 
