@@ -4,8 +4,67 @@ import sys
 import threading
 import keyboard
 
+class Color:
+    def __init__(self, r, g, b, alpha=255):
+        self.r = r
+        self.g = g
+        self.b = b
+        self.alpha = alpha
+
+    def to_tuple(self):
+        return (self.r, self.g, self.b, self.alpha)
+
+class Shape:
+    def __init__(self, x, y, color):
+        self.x = x
+        self.y = y
+        self.color = color
+        self.alive = True
+
+    def draw(self, screen):
+        pass
+
+    def fade(self, delta):
+        # if self.color.alpha > delta:
+        #     self.color.alpha -= delta
+        # else:
+        #     self.color.alpha = 0
+        #     self.alive = False
+        z_count = 0
+        component_names = ['r', 'g', 'b']
+        for comp_name in component_names:
+            value = getattr(self.color, comp_name)
+            if value > delta:
+                value -= delta
+            else:
+                value = 0
+                z_count += 1
+            setattr(self.color, comp_name, value)
+
+        if(z_count == len(component_names)):
+            self.alive = False
+
+# Circle class derived from shape
+class circle(Shape):
+    def __init__(self, x, y, color, radius):
+        self.radius = radius
+        super().__init__(x, y, color)
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, self.color.to_tuple(), (self.x, self.y), self.radius)
+
+# Rectangle class derived from shape
+class rectangle(Shape):
+    def __init__(self, x, y, color, width, height):
+        self.width = width
+        self.height = height
+        super().__init__(x, y, color)
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color.to_tuple(), (self.x, self.y, self.width, self.height))
+
 def random_color():
-    return random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
+    return Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
 def block_system_keys():
     # List of keys to block
@@ -40,6 +99,7 @@ pressed_keys = set()
 exit_combination = [pygame.K_LCTRL, pygame.K_c]
 
 running = True
+prev_time = pygame.time.get_ticks()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
@@ -58,7 +118,7 @@ while running:
                 radius = random.randint(10, 50)
                 x = random.randint(radius, screen_width - radius)
                 y = random.randint(radius, screen_height - radius)
-                items.append(('circle', color, (x, y), radius))
+                items.append(circle(x, y, color, radius))
             else:
                 # Rectangle
                 width = random.randint(20, 100)
@@ -66,7 +126,7 @@ while running:
                 x = random.randint(0, screen_width - width)
                 y = random.randint(0, screen_height - height)
                 rect = pygame.Rect(x, y, width, height)
-                items.append(('rect', color, rect))
+                items.append(rectangle(x, y, color, width, height))
 
         elif event.type == pygame.KEYUP:
             if event.key in pressed_keys:
@@ -74,14 +134,23 @@ while running:
 
     screen.fill((0, 0, 0))
 
+    # Implement a 10ms tick
+    tick = False
+    dt_ms = pygame.time.get_ticks() - prev_time
+    if dt_ms > 10:
+        tick = True
+        prev_time = pygame.time.get_ticks()
+
     # Draw all items
     for item in items:
-        if item[0] == 'circle':
-            _, color, position, radius = item
-            pygame.draw.circle(screen, color, position, radius)
-        elif item[0] == 'rect':
-            _, color, rect = item
-            pygame.draw.rect(screen, color, rect)
+        item.draw(screen)
+
+        # Fade on tick
+        if tick:
+            item.fade(1)
+
+    # remove dead items
+    items = [item for item in items if item.alive]
 
     pygame.display.flip()
 
