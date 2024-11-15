@@ -25,11 +25,6 @@ class Shape:
         pass
 
     def fade(self, delta):
-        # if self.color.alpha > delta:
-        #     self.color.alpha -= delta
-        # else:
-        #     self.color.alpha = 0
-        #     self.alive = False
         z_count = 0
         component_names = ['r', 'g', 'b']
         for comp_name in component_names:
@@ -45,7 +40,7 @@ class Shape:
             self.alive = False
 
 # Circle class derived from shape
-class circle(Shape):
+class Circle(Shape):
     def __init__(self, x, y, color, radius):
         self.radius = radius
         super().__init__(x, y, color)
@@ -54,7 +49,7 @@ class circle(Shape):
         pygame.draw.circle(screen, self.color.to_tuple(), (self.x, self.y), self.radius)
 
 # Rectangle class derived from shape
-class rectangle(Shape):
+class Rectangle(Shape):
     def __init__(self, x, y, color, width, height):
         self.width = width
         self.height = height
@@ -79,80 +74,82 @@ def block_system_keys():
     # Keep the script running to maintain the block
     keyboard.wait('ctrl+c')  # Use Ctrl+C to stop blocking if needed
 
-# Start blocking keys in a separate thread
-block_thread = threading.Thread(target=block_system_keys)
-block_thread.daemon = True
-block_thread.start()
+if __name__ == "__main__":
 
-pygame.init()
+    # Start blocking keys in a separate thread
+    block_thread = threading.Thread(target=block_system_keys)
+    block_thread.daemon = True
+    block_thread.start()
 
-# Screen setup
-info_object = pygame.display.Info()
-screen_width = info_object.current_w
-screen_height = info_object.current_h
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
-pygame.display.set_caption('Key Basher')
+    pygame.init()
 
-# Variables
-items = []
-pressed_keys = set()
-exit_combination = [pygame.K_LCTRL, pygame.K_c]
+    # Screen setup
+    info_object = pygame.display.Info()
+    screen_width = info_object.current_w
+    screen_height = info_object.current_h
+    screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
+    pygame.display.set_caption('Key Basher')
 
-running = True
-prev_time = pygame.time.get_ticks()
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            pressed_keys.add(event.key)
+    # Variables
+    items = []
+    pressed_keys = set()
+    exit_combination = [pygame.K_LCTRL, pygame.K_c]
 
-            # Check for exit combination
-            if all(key in pressed_keys for key in exit_combination):
-                running = False
-                break
+    running = True
+    prev_time = pygame.time.get_ticks()
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                pressed_keys.add(event.key)
 
-            color = random_color()
+                # Check for exit combination
+                if all(key in pressed_keys for key in exit_combination):
+                    running = False
+                    break
 
-            # Randomly choose to draw a circle or rectangle
-            if random.choice([True, False]):
-                # Circle
-                radius = random.randint(10, 50)
-                x = random.randint(radius, screen_width - radius)
-                y = random.randint(radius, screen_height - radius)
-                items.append(circle(x, y, color, radius))
-            else:
-                # Rectangle
-                width = random.randint(20, 100)
-                height = random.randint(20, 100)
-                x = random.randint(0, screen_width - width)
-                y = random.randint(0, screen_height - height)
-                rect = pygame.Rect(x, y, width, height)
-                items.append(rectangle(x, y, color, width, height))
+                color = random_color()
 
-        elif event.type == pygame.KEYUP:
-            if event.key in pressed_keys:
-                pressed_keys.remove(event.key)
+                # Randomly choose to draw a circle or rectangle
+                if random.choice([True, False]):
+                    # Circle
+                    radius = random.randint(10, 50)
+                    x = random.randint(radius, screen_width - radius)
+                    y = random.randint(radius, screen_height - radius)
+                    items.append(Circle(x, y, color, radius))
+                else:
+                    # Rectangle
+                    width = random.randint(20, 100)
+                    height = random.randint(20, 100)
+                    x = random.randint(0, screen_width - width)
+                    y = random.randint(0, screen_height - height)
+                    rect = pygame.Rect(x, y, width, height)
+                    items.append(Rectangle(x, y, color, width, height))
 
-    screen.fill((0, 0, 0))
+            elif event.type == pygame.KEYUP:
+                if event.key in pressed_keys:
+                    pressed_keys.remove(event.key)
 
-    # Implement a 10ms tick
-    tick = False
-    dt_ms = pygame.time.get_ticks() - prev_time
-    if dt_ms > 10:
-        tick = True
-        prev_time = pygame.time.get_ticks()
+        screen.fill((0, 0, 0))
 
-    # Draw all items
-    for item in items:
-        item.draw(screen)
+        # Implement a 10ms tick
+        tick = False
+        dt_ms = pygame.time.get_ticks() - prev_time
+        if dt_ms > 10:
+            tick = True
+            prev_time = pygame.time.get_ticks()
 
-        # Fade on tick
-        if tick:
-            item.fade(1)
+        # Draw all items
+        for item in items:
+            item.draw(screen)
 
-    # remove dead items
-    items = [item for item in items if item.alive]
+            # Fade on tick
+            if tick:
+                item.fade(1)
 
-    pygame.display.flip()
+        # remove dead items
+        items = [item for item in items if item.alive]
 
-pygame.quit()
-sys.exit()
+        pygame.display.flip()
+
+    pygame.quit()
+    sys.exit()
