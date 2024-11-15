@@ -82,6 +82,7 @@ if __name__ == "__main__":
     block_thread.start()
 
     pygame.init()
+    pygame.mouse.set_visible(False)
 
     # Screen setup
     info_object = pygame.display.Info()
@@ -128,6 +129,25 @@ if __name__ == "__main__":
             elif event.type == pygame.KEYUP:
                 if event.key in pressed_keys:
                     pressed_keys.remove(event.key)
+
+            elif event.type == pygame.MOUSEMOTION:
+                red = Color(255, 0, 0)
+                items.append(Circle(event.pos[0], event.pos[1], red, 20))
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left click
+                    green = Color(0, 255, 0)
+                    items.append(Circle(event.pos[0], event.pos[1], green, 200))
+                elif event.button == 3:  # Right click
+                    blue = Color(0, 0, 255)
+                    items.append(Circle(event.pos[0], event.pos[1], blue, 200))
+                else:
+                    # Ignore 2: middle click, 4: scroll wheel up, 5: scroll wheel down
+                    pass
+
+            else:
+                # Ignore other events
+                pass
 
         screen.fill((0, 0, 0))
 
