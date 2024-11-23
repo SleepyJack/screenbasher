@@ -3,6 +3,7 @@ import random
 import sys
 import threading
 import keyboard
+from version import version_string
 
 class Color:
     def __init__(self, r, g, b, alpha=255):
@@ -75,6 +76,7 @@ def block_system_keys():
     keyboard.wait('ctrl+c')  # Use Ctrl+C to stop blocking if needed
 
 if __name__ == "__main__":
+    print(f"Screenbasher {version_string}")
 
     # Start blocking keys in a separate thread
     block_thread = threading.Thread(target=block_system_keys)
