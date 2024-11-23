@@ -3,7 +3,8 @@ import random
 import sys
 import threading
 import keyboard
-from version import version_string
+
+version_string = "UNKNOWN"
 
 class Color:
     def __init__(self, r, g, b, alpha=255):

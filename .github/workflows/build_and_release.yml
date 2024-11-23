@@ -32,8 +32,9 @@ jobs:
           fi
         shell: bash
 
-      - name: Update version.py
-        run: echo "version_string=\"${{ env.VERSION }}\"" > version.py
+      - name: Update version_string
+        run: |
+          sed -i 's/^version_string\s*=\s*".*"/version_string = "${{ env.VERSION }}"/' screenbasher.py
 
       - name: Install dependencies
         run: |
